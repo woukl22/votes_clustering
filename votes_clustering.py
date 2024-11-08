@@ -5,6 +5,8 @@ from sklearn.preprocessing import LabelEncoder
 from sklearn.cluster import KMeans
 import matplotlib.pyplot as plt
 import numpy as np
+from scipy.spatial import Voronoi, voronoi_plot_2d
+import matplotlib.cm as cm
 
 # 체인 리스트와 데이터 로드
 chain_list = ['gravity-bridge', 'kava', 'terra', 'stargaze', 'secret', 'evmos', 'osmosis', 'canto', 'injective', 
@@ -44,10 +46,22 @@ votes_df['cluster_label'] = clusters
 
 # 체인 중앙점 계산
 chain_centers = {}
+radii = []
+most_clusters = []
 for chain in chain_list:
     chain_data = tsne_results[votes_df[chain] == 1]
-    center_x, center_y = chain_data.mean(axis=0)
-    chain_centers[chain] = (center_x, center_y)
+    if len(chain_data) > 0:
+        center_x, center_y = chain_data.mean(axis=0)
+        distances = np.linalg.norm(chain_data - np.array([center_x, center_y]), axis=1)
+        radius = distances.max()
+        
+        # 가장 큰 클러스터 계산
+        cluster_counts = votes_df[votes_df[chain] == 1]['cluster_label'].value_counts()
+        most_cluster = cluster_counts.idxmax()
+        
+        chain_centers[chain] = (center_x, center_y)
+        radii.append(radius)
+        most_clusters.append(most_cluster)
 
 # selected_chain의 중심점에서 가장 먼 점을 찾고 반지름 계산
 if selected_chain:
@@ -148,3 +162,28 @@ chain_info_df = pd.DataFrame(chain_info).sort_values(by="radius", ascending=Fals
 # 테이블 출력
 st.write("Chain Information Sorted by Radius")
 st.dataframe(chain_info_df)
+
+
+# Voronoi 다이어그램 생성
+voronoi_points = np.array(list(chain_centers.values()))
+vor = Voronoi(voronoi_points)
+
+# Voronoi 다이어그램 시각화
+fig, ax = plt.subplots(figsize=(10, 10))
+voronoi_plot_2d(vor, ax=ax, show_vertices=False, line_colors='orange', line_width=1.5)
+
+
+cmap = cm.get_cmap("Spectral", 12)
+# 반지름을 표시하는 원 추가
+for i, (chain, (center_x, center_y)) in enumerate(chain_centers.items()):
+    # most_cluster의 색상으로 동그라미 그리기
+    color = cmap(most_clusters[i] / 12)  # Normalize cluster number to [0, 1]
+    ax.scatter(center_x, center_y, marker='o', s=120, color=color, edgecolor='black')  # 크기 조정
+    # 체인 이름을 원 아래에 표시
+    ax.text(center_x, center_y - radii[i] * 0.05, chain, fontsize=9, ha='center', va='top', color='black', fontweight='bold')
+
+# 시각화 설정 및 출력
+ax.set_title("Voronoi Diagram of Chain Centers with Radius")
+ax.set_xlabel("t-SNE Component 1")
+ax.set_ylabel("t-SNE Component 2")
+st.pyplot(fig)
