@@ -18,7 +18,7 @@ st.title("Validator Votes with KMeans Clustering")
 
 # 사이드바에서 클러스터 개수와 체인 선택 옵션
 st.sidebar.header("Clustering and Chain Options")
-cluster_count = st.sidebar.slider("Select number of clusters for KMeans:", min_value=2, max_value=30, value=12, step=1)
+cluster_count = st.sidebar.slider("Select number of clusters for KMeans:", min_value=2, max_value=30, value=13, step=1)
 
 # 라디오 버튼을 사용하여 표시 옵션 선택
 view_option = st.sidebar.radio("View Options:", ["View no chains", "View all chains", "View a specific chain"], index=2)
