@@ -9,8 +9,19 @@ from scipy.spatial import Voronoi, voronoi_plot_2d
 import matplotlib.cm as cm
 
 # 체인 리스트와 데이터 로드
-chain_list = ['gravity-bridge', 'kava', 'terra', 'stargaze', 'secret', 'evmos', 'osmosis', 'canto', 'injective', 
-              'crescent', 'cosmos', 'axelar', 'juno', 'akash']
+chain_list = ['kava',
+ 'injective',
+ 'axelar',
+ 'osmosis',
+ 'terra',
+ 'iris',
+ 'dydx',
+ 'secret',
+ 'akash',
+ 'stargaze',
+ 'gravity-bridge',
+ 'sentinel',
+ 'juno']
 votes_df = pd.read_csv('./validator_votes_all.csv').drop(columns='Unnamed: 0')
 
 # Streamlit 페이지 설정
@@ -18,7 +29,7 @@ st.title("Validator Votes with KMeans Clustering")
 
 # 사이드바에서 클러스터 개수와 체인 선택 옵션
 st.sidebar.header("Clustering and Chain Options")
-cluster_count = st.sidebar.slider("Select number of clusters for KMeans:", min_value=2, max_value=30, value=13, step=1)
+cluster_count = st.sidebar.slider("Select number of clusters for KMeans:", min_value=2, max_value=30, value=15, step=1)
 
 # 라디오 버튼을 사용하여 표시 옵션 선택
 view_option = st.sidebar.radio("View Options:", ["View no chains", "View all chains", "View a specific chain"], index=2)
